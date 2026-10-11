@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlquilaYa | Mantenimientos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --ink: #1b2a38; --petrol: #0e7490; --paper: #f3f6f7; --accent: #e5a93f; }
+        body { background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+        .navbar { background: var(--ink); }
+        .brand-mark { color: var(--accent); font-weight: 700; letter-spacing: 1px; }
+        .navbar .nav-link { color: rgb(255 255 255 / 60%); }
+        .navbar .nav-link:hover { color: #fff; }
+        .navbar .nav-link.active { color: var(--accent); font-weight: 700; }
+        .page-header { border-bottom: 3px solid var(--accent); }
+        .panel { background: #fff; border: 1px solid #d9e1df; border-radius: 6px; box-shadow: 0 8px 20px rgb(27 42 56 / 8%); }
+        .table thead th { color: #fff; background: var(--ink); white-space: nowrap; }
+        .btn-primary { background: var(--petrol); border-color: var(--petrol); }
+        .btn-primary:hover { background: #0a5a72; border-color: #0a5a72; }
+        .form-control:focus, .form-select:focus { border-color: var(--petrol); box-shadow: 0 0 0 .2rem rgb(14 116 144 / 18%); }
+        .cifra { font-variant-numeric: tabular-nums; white-space: nowrap; }
+        @media (max-width: 767px) { .table { font-size: .86rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand brand-mark" th:href="@{/vista/alquileres}">ALQUILAYA</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menuPrincipal">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/alquileres}">Alquileres</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/vehiculos}">Vehículos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/clientes}">Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/oficinas}">Oficinas</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/vista/mantenimientos}">Mantenimientos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/usuarios}">Usuarios</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container pb-5">
+        <header class="page-header d-flex justify-content-between align-items-end mb-4 pb-3">
+            <div>
+                <p class="small mb-1 text-secondary">Administración</p>
+                <h1 class="h2 mb-0">Mantenimientos</h1>
+            </div>
+            <span class="badge text-bg-light border" th:text="${#lists.size(mantenimientos)} + ' registrados'">0 registrados</span>
+        </header>
+        <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${mensaje}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4">
+            <section class="col-lg-4">
+                <div class="panel p-4">
+                    <h2 class="h5 mb-3">Registrar mantenimiento</h2>
+                    <form th:action="@{/vista/mantenimientos/guardar}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label" for="idVehiculo">Vehículo disponible</label>
+                            <select id="idVehiculo" name="idVehiculo" class="form-select" required>
+                                <option value="">Selecciona un vehículo</option>
+                                <option th:each="v : ${vehiculos}" th:value="${v.idVehiculo}" th:text="${v.marca} + ' ' + ${v.modelo} + ' (' + ${v.matricula} + ')'"></option>
+                            </select>
+                            <div class="form-text text-danger" th:if="${#lists.isEmpty(vehiculos)}">No hay vehículos disponibles: los alquilados o en mantenimiento no se pueden registrar.</div>
+                        </div>
+                        <div class="mb-3"><label class="form-label" for="fechaMantenimiento">Fecha</label><input id="fechaMantenimiento" name="fechaMantenimiento" type="date" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label" for="descripcion">Descripción</label><textarea id="descripcion" name="descripcion" rows="3" class="form-control" required></textarea></div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-6"><label class="form-label" for="costo">Costo</label><input id="costo" name="costo" type="number" min="0" step="0.01" class="form-control" required></div>
+                            <div class="col-6"><label class="form-label" for="kilometraje">Kilometraje</label><input id="kilometraje" name="kilometraje" type="number" min="0" class="form-control" required></div>
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit" th:disabled="${#lists.isEmpty(vehiculos)}">Guardar mantenimiento</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="col-lg-8">
+                <div class="panel p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 mb-0">Historial</h2>
+                        <input class="form-control form-control-sm w-auto" type="search" placeholder="Buscar vehículo o descripción" id="buscador">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tabla">
+                            <thead><tr><th>ID</th><th>Vehículo</th><th>Fecha</th><th>Descripción</th><th>Costo</th><th>Km</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+                            <tbody>
+                                <tr th:each="item : ${mantenimientos}" data-fila>
+                                    <td th:text="${item.idMantenimiento}"></td>
+                                    <td th:text="${item.vehiculoDescripcion}"></td>
+                                    <td class="cifra" th:text="${item.fechaMantenimiento}"></td>
+                                    <td th:text="${item.descripcion}"></td>
+                                    <td class="cifra" th:text="'$' + ${#numbers.formatDecimal(item.costo, 1, 'COMMA', 2, 'POINT')}"></td>
+                                    <td class="cifra" th:text="${#numbers.formatInteger(item.kilometraje, 1, 'COMMA')}"></td>
+                                    <td><span class="badge" th:classappend="${item.activo} ? 'text-bg-warning' : 'text-bg-secondary'" th:text="${item.activo} ? 'En curso' : 'Terminado'"></span></td>
+                                    <td class="text-end text-nowrap">
+                                        <form class="d-inline" th:if="${item.activo}" th:action="@{/vista/mantenimientos/{id}/finalizar(id=${item.idMantenimiento})}" method="post"><button class="btn btn-outline-success btn-sm" type="submit" onclick="return confirm('¿Terminar el mantenimiento? El vehículo quedará disponible.')">Terminar</button></form>
+                                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" th:data-bs-target="'#editar-' + ${item.idMantenimiento}">Editar</button>
+                                        <form class="d-inline" th:action="@{/vista/mantenimientos/{id}/eliminar(id=${item.idMantenimiento})}" method="post"><button class="btn btn-outline-danger btn-sm" type="submit" onclick="return confirm('¿Eliminar este mantenimiento?')">Eliminar</button></form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(mantenimientos)}"><td colspan="8" class="text-center text-secondary py-4">Aún no hay mantenimientos registrados.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:each="item : ${mantenimientos}" class="modal fade" th:id="'editar-' + ${item.idMantenimiento}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog"><div class="modal-content">
+                <form th:action="@{/vista/mantenimientos/{id}/actualizar(id=${item.idMantenimiento})}" method="post">
+                    <div class="modal-header"><h3 class="modal-title fs-5">Editar mantenimiento</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                    <div class="modal-body">
+                        <p class="mb-3" th:text="${item.vehiculoDescripcion}"></p>
+                        <input type="hidden" name="idVehiculo" th:value="${item.idVehiculo}">
+                        <div class="mb-3"><label class="form-label">Fecha</label><input class="form-control" name="fechaMantenimiento" type="date" th:value="${item.fechaMantenimiento}" required></div>
+                        <div class="mb-3"><label class="form-label">Descripción</label><textarea class="form-control" name="descripcion" rows="3" th:text="${item.descripcion}" required></textarea></div>
+                        <div class="row g-3">
+                            <div class="col-6"><label class="form-label">Costo</label><input class="form-control" name="costo" type="number" min="0" step="0.01" th:value="${item.costo}" required></div>
+                            <div class="col-6"><label class="form-label">Kilometraje</label><input class="form-control" name="kilometraje" type="number" min="0" th:value="${item.kilometraje}" required></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar cambios</button></div>
+                </form>
+            </div></div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('buscador').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('#tabla tbody tr[data-fila]').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

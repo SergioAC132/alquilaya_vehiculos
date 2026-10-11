@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlquilaYa | Vehículos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --ink: #1b2a38; --petrol: #0e7490; --paper: #f3f6f7; --accent: #e5a93f; }
+        body { background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+        .navbar { background: var(--ink); }
+        .brand-mark { color: var(--accent); font-weight: 700; letter-spacing: 1px; }
+        .navbar .nav-link { color: rgb(255 255 255 / 60%); }
+        .navbar .nav-link:hover { color: #fff; }
+        .navbar .nav-link.active { color: var(--accent); font-weight: 700; }
+        .page-header { border-bottom: 3px solid var(--accent); }
+        .panel { background: #fff; border: 1px solid #d9e1df; border-radius: 6px; box-shadow: 0 8px 20px rgb(27 42 56 / 8%); }
+        .table thead th { color: #fff; background: var(--ink); white-space: nowrap; }
+        .btn-primary { background: var(--petrol); border-color: var(--petrol); }
+        .btn-primary:hover { background: #0a5a72; border-color: #0a5a72; }
+        .form-control:focus, .form-select:focus { border-color: var(--petrol); box-shadow: 0 0 0 .2rem rgb(14 116 144 / 18%); }
+        .cifra { font-variant-numeric: tabular-nums; white-space: nowrap; }
+        @media (max-width: 767px) { .table { font-size: .86rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand brand-mark" th:href="@{/vista/alquileres}">ALQUILAYA</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menuPrincipal">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/alquileres}">Alquileres</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/vista/vehiculos}">Vehículos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/clientes}">Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/oficinas}">Oficinas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/mantenimientos}">Mantenimientos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/usuarios}">Usuarios</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container pb-5">
+        <header class="page-header d-flex justify-content-between align-items-end mb-4 pb-3">
+            <div>
+                <p class="small mb-1 text-secondary">Administración</p>
+                <h1 class="h2 mb-0">Vehículos</h1>
+            </div>
+            <span class="badge text-bg-light border" th:text="${#lists.size(vehiculos)} + ' registrados'">0 registrados</span>
+        </header>
+        <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${mensaje}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4">
+            <section class="col-lg-4">
+                <div class="panel p-4">
+                    <h2 class="h5 mb-3">Registrar vehículo</h2>
+                    <form th:action="@{/vista/vehiculos/guardar}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label" for="tipo">Tipo de vehículo</label>
+                            <select id="tipo" name="tipo" class="form-select" data-tipo-selector required>
+                                <option value="COCHE">Coche</option>
+                                <option value="COCHE_ELECTRICO">Coche eléctrico</option>
+                                <option value="FURGONETA">Furgoneta</option>
+                                <option value="MOTO">Moto</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="idOficina">Oficina</label>
+                            <select id="idOficina" name="idOficina" class="form-select" required>
+                                <option value="">Selecciona una oficina</option>
+                                <option th:each="o : ${oficinas}" th:value="${o.idOficina}" th:text="${o.nombre} + ' (' + ${o.ciudad} + ')'"></option>
+                            </select>
+                            <div class="form-text text-danger" th:if="${#lists.isEmpty(oficinas)}">Primero registra una oficina.</div>
+                        </div>
+                        <div class="mb-3"><label class="form-label" for="marca">Marca</label><input id="marca" name="marca" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label" for="modelo">Modelo</label><input id="modelo" name="modelo" class="form-control" required></div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-5"><label class="form-label" for="anio">Año</label><input id="anio" name="anio" type="number" min="1900" max="2100" class="form-control" required></div>
+                            <div class="col-7"><label class="form-label" for="matricula">Matrícula</label><input id="matricula" name="matricula" class="form-control" required></div>
+                        </div>
+                        <div class="mb-3"><label class="form-label" for="tarifaDiaria">Tarifa diaria</label><input id="tarifaDiaria" name="tarifaDiaria" type="number" min="0.01" step="0.01" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label" for="detalle">Detalle (opcional)</label><input id="detalle" name="detalle" class="form-control" maxlength="255" placeholder="Color, equipamiento, observaciones"></div>
+
+                        <div class="mb-3 d-none" data-tipos="MOTO"><label class="form-label" for="cilindrada">Cilindrada (cc)</label><input id="cilindrada" name="cilindrada" type="number" min="1" class="form-control" required></div>
+                        <div class="mb-3 d-none" data-tipos="FURGONETA"><label class="form-label" for="capacidadCargaKg">Capacidad de carga (kg)</label><input id="capacidadCargaKg" name="capacidadCargaKg" type="number" min="1" class="form-control" required></div>
+                        <div class="row g-3 mb-3 d-none" data-tipos="COCHE_ELECTRICO">
+                            <div class="col-6"><label class="form-label" for="nivelBateria">Batería (%)</label><input id="nivelBateria" name="nivelBateria" type="number" min="0" max="100" class="form-control" required></div>
+                            <div class="col-6"><label class="form-label" for="autonomiaMaximaKm">Autonomía (km)</label><input id="autonomiaMaximaKm" name="autonomiaMaximaKm" type="number" min="1" class="form-control" required></div>
+                        </div>
+
+                        <button class="btn btn-primary w-100 mt-2" type="submit" th:disabled="${#lists.isEmpty(oficinas)}">Guardar vehículo</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="col-lg-8">
+                <div class="panel p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 mb-0">Flota</h2>
+                        <input class="form-control form-control-sm w-auto" type="search" placeholder="Buscar marca, modelo o matrícula" id="buscador">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tabla">
+                            <thead><tr><th>ID</th><th>Vehículo</th><th>Tipo</th><th>Detalle</th><th>Tarifa/día</th><th>Oficina</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+                            <tbody>
+                                <tr th:each="item : ${vehiculos}" data-fila>
+                                    <td th:text="${item.idVehiculo}"></td>
+                                    <td><span th:text="${item.marca} + ' ' + ${item.modelo}"></span><div class="small text-secondary" th:text="${item.matricula} + ', ' + ${item.anio}"></div></td>
+                                    <td th:text="${item.tipoEtiqueta}"></td>
+                                    <td><span th:text="${item.detalle} ?: '-'"></span><div class="small text-secondary" th:if="${item.resumen}" th:text="${item.resumen}"></div></td>
+                                    <td class="cifra" th:text="'$' + ${#numbers.formatDecimal(item.tarifaDiaria, 1, 'COMMA', 2, 'POINT')}"></td>
+                                    <td th:text="${item.oficinaNombre}"></td>
+                                    <td><span class="badge" th:classappend="${item.estado == 'DISPONIBLE'} ? 'text-bg-success' : (${item.estado == 'ALQUILADO'} ? 'text-bg-warning' : 'text-bg-secondary')" th:text="${#strings.capitalize(#strings.toLowerCase(item.estado))}"></span></td>
+                                    <td class="text-end text-nowrap">
+                                        <form class="d-inline" th:if="${item.tipo == 'COCHE_ELECTRICO'}" th:action="@{/vista/vehiculos/{id}/cargar-bateria(id=${item.idVehiculo})}" method="post"><button class="btn btn-outline-success btn-sm" type="submit">Cargar</button></form>
+                                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" th:data-bs-target="'#editar-' + ${item.idVehiculo}">Editar</button>
+                                        <form class="d-inline" th:action="@{/vista/vehiculos/{id}/eliminar(id=${item.idVehiculo})}" method="post"><button class="btn btn-outline-danger btn-sm" type="submit" onclick="return confirm('¿Eliminar este vehículo?')">Eliminar</button></form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(vehiculos)}"><td colspan="8" class="text-center text-secondary py-4">Aún no hay vehículos. Registra el primero desde el formulario.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:each="item : ${vehiculos}" class="modal fade" th:id="'editar-' + ${item.idVehiculo}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog"><div class="modal-content">
+                <form th:action="@{/vista/vehiculos/{id}/actualizar(id=${item.idVehiculo})}" method="post">
+                    <input type="hidden" name="tipo" th:value="${item.tipo}">
+                    <div class="modal-header"><h3 class="modal-title fs-5" th:text="'Editar ' + ${#strings.toLowerCase(item.tipoEtiqueta)}">Editar vehículo</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Oficina</label>
+                            <select name="idOficina" class="form-select" required>
+                                <option th:each="o : ${oficinas}" th:value="${o.idOficina}" th:text="${o.nombre} + ' (' + ${o.ciudad} + ')'" th:selected="${o.idOficina == item.idOficina}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3"><label class="form-label">Marca</label><input class="form-control" name="marca" th:value="${item.marca}" required></div>
+                        <div class="mb-3"><label class="form-label">Modelo</label><input class="form-control" name="modelo" th:value="${item.modelo}" required></div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-5"><label class="form-label">Año</label><input class="form-control" name="anio" type="number" min="1900" max="2100" th:value="${item.anio}" required></div>
+                            <div class="col-7"><label class="form-label">Matrícula</label><input class="form-control" name="matricula" th:value="${item.matricula}" required></div>
+                        </div>
+                        <div class="mb-3"><label class="form-label">Tarifa diaria</label><input class="form-control" name="tarifaDiaria" type="number" min="0.01" step="0.01" th:value="${item.tarifaDiaria}" required></div>
+                        <div class="mb-3"><label class="form-label">Detalle (opcional)</label><input class="form-control" name="detalle" maxlength="255" th:value="${item.detalle}"></div>
+                        <div class="mb-3" th:if="${item.tipo == 'MOTO'}"><label class="form-label">Cilindrada (cc)</label><input class="form-control" name="cilindrada" type="number" min="1" th:value="${item.cilindrada}" required></div>
+                        <div class="mb-3" th:if="${item.tipo == 'FURGONETA'}"><label class="form-label">Capacidad de carga (kg)</label><input class="form-control" name="capacidadCargaKg" type="number" min="1" th:value="${item.capacidadCargaKg}" required></div>
+                        <div class="row g-3" th:if="${item.tipo == 'COCHE_ELECTRICO'}">
+                            <div class="col-6"><label class="form-label">Batería (%)</label><input class="form-control" name="nivelBateria" type="number" min="0" max="100" th:value="${item.nivelBateria}" required></div>
+                            <div class="col-6"><label class="form-label">Autonomía (km)</label><input class="form-control" name="autonomiaMaximaKm" type="number" min="1" th:value="${item.autonomiaMaximaKm}" required></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar cambios</button></div>
+                </form>
+            </div></div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('buscador').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('#tabla tbody tr[data-fila]').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+
+        const selector = document.querySelector('[data-tipo-selector]');
+        function mostrarCampos() {
+            document.querySelectorAll('[data-tipos]').forEach(function (grupo) {
+                const visible = grupo.dataset.tipos === selector.value;
+                grupo.classList.toggle('d-none', !visible);
+                grupo.querySelectorAll('input').forEach(function (campo) { campo.disabled = !visible; });
+            });
+        }
+        selector.addEventListener('change', mostrarCampos);
+        mostrarCampos();
+    </script>
+</body>
+</html>

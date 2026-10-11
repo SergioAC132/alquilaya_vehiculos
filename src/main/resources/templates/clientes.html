@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlquilaYa | Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --ink: #1b2a38; --petrol: #0e7490; --paper: #f3f6f7; --accent: #e5a93f; }
+        body { background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+        .navbar { background: var(--ink); }
+        .brand-mark { color: var(--accent); font-weight: 700; letter-spacing: 1px; }
+        .navbar .nav-link { color: rgb(255 255 255 / 60%); }
+        .navbar .nav-link:hover { color: #fff; }
+        .navbar .nav-link.active { color: var(--accent); font-weight: 700; }
+        .page-header { border-bottom: 3px solid var(--accent); }
+        .panel { background: #fff; border: 1px solid #d9e1df; border-radius: 6px; box-shadow: 0 8px 20px rgb(27 42 56 / 8%); }
+        .table thead th { color: #fff; background: var(--ink); white-space: nowrap; }
+        .btn-primary { background: var(--petrol); border-color: var(--petrol); }
+        .btn-primary:hover { background: #0a5a72; border-color: #0a5a72; }
+        .form-control:focus, .form-select:focus { border-color: var(--petrol); box-shadow: 0 0 0 .2rem rgb(14 116 144 / 18%); }
+        .cifra { font-variant-numeric: tabular-nums; white-space: nowrap; }
+        @media (max-width: 767px) { .table { font-size: .86rem; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand brand-mark" th:href="@{/vista/alquileres}">ALQUILAYA</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menuPrincipal">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/alquileres}">Alquileres</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/vehiculos}">Vehículos</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/vista/clientes}">Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/oficinas}">Oficinas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/mantenimientos}">Mantenimientos</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/vista/usuarios}">Usuarios</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container pb-5">
+        <header class="page-header d-flex justify-content-between align-items-end mb-4 pb-3">
+            <div>
+                <p class="small mb-1 text-secondary">Administración</p>
+                <h1 class="h2 mb-0">Clientes</h1>
+            </div>
+            <span class="badge text-bg-light border" th:text="${#lists.size(clientes)} + ' registrados'">0 registrados</span>
+        </header>
+        <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${mensaje}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span><button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row g-4">
+            <section class="col-lg-4">
+                <div class="panel p-4">
+                    <h2 class="h5 mb-3">Registrar cliente</h2>
+                    <form th:action="@{/vista/clientes/guardar}" method="post">
+                        <div class="mb-3"><label class="form-label" for="nombre">Nombre</label><input id="nombre" name="nombre" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label" for="apellido">Apellido</label><input id="apellido" name="apellido" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label" for="email">Correo electrónico</label><input id="email" name="email" type="email" class="form-control" required></div>
+                        <div class="mb-3"><label class="form-label" for="licenciaConducir">Licencia de conducir</label><input id="licenciaConducir" name="licenciaConducir" class="form-control" required></div>
+                        <div class="mb-4"><label class="form-label" for="telefono">Teléfono</label><input id="telefono" name="telefono" type="tel" class="form-control" required></div>
+                        <button class="btn btn-primary w-100" type="submit">Guardar cliente</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="col-lg-8">
+                <div class="panel p-3 p-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h5 mb-0">Listado</h2>
+                        <input class="form-control form-control-sm w-auto" type="search" placeholder="Buscar cliente" id="buscador">
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tabla">
+                            <thead><tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Licencia</th><th>Teléfono</th><th class="text-end">Acciones</th></tr></thead>
+                            <tbody>
+                                <tr th:each="item : ${clientes}" data-fila>
+                                    <td th:text="${item.idCliente}"></td>
+                                    <td th:text="${item.nombre} + ' ' + ${item.apellido}"></td>
+                                    <td th:text="${item.email}"></td>
+                                    <td th:text="${item.licenciaConducir}"></td>
+                                    <td th:text="${item.telefono}"></td>
+                                    <td class="text-end text-nowrap">
+                                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" th:data-bs-target="'#editar-' + ${item.idCliente}">Editar</button>
+                                        <form class="d-inline" th:action="@{/vista/clientes/{id}/eliminar(id=${item.idCliente})}" method="post"><button class="btn btn-outline-danger btn-sm" type="submit" onclick="return confirm('¿Eliminar este cliente?')">Eliminar</button></form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="6" class="text-center text-secondary py-4">Aún no hay clientes. Registra el primero desde el formulario.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:each="item : ${clientes}" class="modal fade" th:id="'editar-' + ${item.idCliente}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog"><div class="modal-content">
+                <form th:action="@{/vista/clientes/{id}/actualizar(id=${item.idCliente})}" method="post">
+                    <div class="modal-header"><h3 class="modal-title fs-5">Editar cliente</h3><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                    <div class="modal-body">
+                        <div class="mb-3"><label class="form-label">Nombre</label><input class="form-control" name="nombre" th:value="${item.nombre}" required></div>
+                        <div class="mb-3"><label class="form-label">Apellido</label><input class="form-control" name="apellido" th:value="${item.apellido}" required></div>
+                        <div class="mb-3"><label class="form-label">Correo electrónico</label><input class="form-control" name="email" type="email" th:value="${item.email}" required></div>
+                        <div class="mb-3"><label class="form-label">Licencia de conducir</label><input class="form-control" name="licenciaConducir" th:value="${item.licenciaConducir}" required></div>
+                        <div><label class="form-label">Teléfono</label><input class="form-control" name="telefono" type="tel" th:value="${item.telefono}" required></div>
+                    </div>
+                    <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar cambios</button></div>
+                </form>
+            </div></div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('buscador').addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('#tabla tbody tr[data-fila]').forEach(function (row) {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
