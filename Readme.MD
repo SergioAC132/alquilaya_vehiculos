@@ -30,7 +30,7 @@ API REST para gestionar el **alquiler de vehículos**: oficinas, flota (coches, 
 
 ```bash
 # 1. Clonar el repositorio
-git clone <URL-DEL-REPOSITORIO>
+git clone https://github.com/SergioAC132/alquilaya_vehiculos
 cd alquilaya
 
 # 2. Configurar las credenciales de MySQL (ver "Configurar la conexión a la base de datos")
